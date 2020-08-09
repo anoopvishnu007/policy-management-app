@@ -5,7 +5,7 @@ import * as actions from "../actions";
 
 export function* purchasePolicySaga(action) {
   yield put(actions.purchasePoliciesStart());
-  try {
+  try {     
     const response = yield axios.post(
       "/policies.json?auth=" + action.token,
       action.customerPolicies
@@ -23,7 +23,7 @@ export function* fetchCustomerPoliciesSaga(action) {
   const queryParams =
     "?auth=" +
     action.token +
-    '&orderBy="userId"&equalTo="' +
+    '&orderBy="userId"&userId="' +
     action.userId +
     '"';
   try {

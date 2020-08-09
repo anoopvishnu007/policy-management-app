@@ -32,6 +32,9 @@ export const checkValidity = ( value, rules ) => {
         const pattern = /^\d+$/;
         isValid = pattern.test( value ) && isValid
     }
-
+    if ( rules.onlyAlphabetsAndSpace ) {
+        const pattern = /^[a-zA-z]+([\s][a-zA-Z]+)*$/;
+        isValid = pattern.test( value ) && isValid
+    }
     return isValid;
 }

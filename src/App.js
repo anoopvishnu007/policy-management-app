@@ -22,6 +22,9 @@ const asyncPolicies = asyncComponent(() => {
 const asyncPurchasePolicies = asyncComponent(() => {
   return import('./components/Policies/PurchasePolicies');
 });
+const asyncMyProfile = asyncComponent(() => {
+  return import('./components/User/UserDetails');
+});
 
 class App extends Component {
   componentDidMount () {
@@ -47,6 +50,7 @@ class App extends Component {
           <Route path='/signup' component={ asyncSignUp }/>
           <Route path='/purchase' component={ asyncPurchasePolicies }/>
           <Route path='/policies' component={ asyncPolicies }/>
+          <Route path='/updateProfile' component={ asyncMyProfile }/>
           <Route path="/" exact component={PolicyHome} />           
           <Redirect to="/"/>
         </Switch>

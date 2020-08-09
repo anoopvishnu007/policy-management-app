@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import { connect } from 'react-redux';
 import axios from '../../axios-customers';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
@@ -30,9 +30,9 @@ function PurchasePolicies(props) {
   const classes = useStyles();
   const submitHandler = event => {
     event.preventDefault();
-    const customerPolicies = {
-      customerId:customerId,
-      policies:[{
+    const custPolicies = {
+      userId:userId,
+      policies:[...customerPolicies.policies, {
         policyType: policyType,
         policyAmount: policyAmount,
         policyStartDate: policyStartDate,
@@ -40,17 +40,20 @@ function PurchasePolicies(props) {
       }]
        
     };
-    props.purchasePolicy(customerPolicies,props.token);
+    props.purchasePolicy(custPolicies,props.token);
    };
    
   const [policyType, setPolicyType] = useState("");
   const [policyAmount, setPolicyAmount] = useState("");  
   const [policyStartDate, setPolicyStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [policyDuration, setPolicyDuration] = useState("");   
-  const [customerId] = useState(props.userId);
-     
+  const [userId] = useState(props.userId);
+  const [customerPolicies] = useState(props.customerPolicies);   
   const [errors] = useState( {});
-  
+  useEffect(() => {
+    props.onFetchCustomerPolicies(props.token, props.userId);
+    // eslint-disable-next-line
+  }, [])
   const dateLimit = new Date();
    dateLimit.setFullYear(dateLimit.getFullYear() - 18);
   return (
@@ -159,18 +162,19 @@ function PurchasePolicies(props) {
 
 const mapStateToProps = state => {
   return {
-    loading: state.signup.loading,    
+    customerPolicies: state.policy.customerPolicies,
+    loading: state.policy.loading,    
     token: state.auth.token,
     isAuthenticated: state.auth.token !== null,
-    userId: state.auth.userId
+    userId: state.auth.userId,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
      purchasePolicy: (customerPolicies, token) =>
-     dispatch(actions.purchasePolicies(customerPolicies, token))
-      
+     dispatch(actions.purchasePolicies(customerPolicies, token)),
+     onFetchCustomerPolicies: (token, userId) => dispatch( actions.fetchCustomerPolicies(token, userId) )  
   };
 };
 export default connect(

@@ -8,7 +8,7 @@ import {
   authCheckStateSaga
 } from "./auth";
 import { purchasePolicySaga, fetchCustomerPoliciesSaga } from "./policies";
-import { customerSignupSaga } from "./signup";
+import { customerSignupSaga,fetchCustomerDetailsSaga,customerUpdateSaga } from "./signup";
 
 export function* watchAuth() {
   yield all([
@@ -26,4 +26,6 @@ export function* watchPolicies() {
 }
 export function* watchCustomerSignup() {
   yield takeLatest(actionTypes.CUSTOMER_SIGNUP, customerSignupSaga);
+  yield takeLatest(actionTypes.CUSTOMER_UPDATE, customerUpdateSaga);
+  yield takeLatest(actionTypes.FETCH_CUSTOMER_DETAILS, fetchCustomerDetailsSaga);
  }

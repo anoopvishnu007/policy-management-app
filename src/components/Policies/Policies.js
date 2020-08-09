@@ -47,31 +47,35 @@ const useStyles = makeStyles({
     props.onFetchCustomerPolicies(props.token, props.userId);
     // eslint-disable-next-line
   }, [])
+  if (props.loading) {
+    return <div>Loading</div>
+  }   
+  if (props.error) {
+    return <div style={{color: 'red'}}>ERROR: {this.props.error}</div>
+  }
   return (
-    
+   
     <TableContainer component={Paper}>
       <Table className={classes.table} aria-label="customized table">
         <TableHead>
           <TableRow>
-            <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-            <StyledTableCell align="right">Calories</StyledTableCell>
-            <StyledTableCell align="right">Fat&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Carbs&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Protein&nbsp;(g)</StyledTableCell>
-          </TableRow>
+            <StyledTableCell>Policy Type</StyledTableCell>
+            <StyledTableCell align="right">Amount</StyledTableCell>
+            <StyledTableCell align="right">Start Date</StyledTableCell>
+            <StyledTableCell align="right">Duration</StyledTableCell>
+           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <StyledTableRow key={row.name}>
+          {Object.keys(props.customerPolicies).map((k)=>Object.keys(props.customerPolicies[k]).map((row) => (
+            <StyledTableRow key={row.policyType}>
               <StyledTableCell component="th" scope="row">
-                {row.name}
+                {row.policyType}
               </StyledTableCell>
-              <StyledTableCell align="right">{row.calories}</StyledTableCell>
-              <StyledTableCell align="right">{row.fat}</StyledTableCell>
-              <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
+              <StyledTableCell align="right">{row.policyAmount}</StyledTableCell>
+               <StyledTableCell align="right">{row.policyStartDate}</StyledTableCell>
+              <StyledTableCell align="right">{row.policyDuration}</StyledTableCell>
             </StyledTableRow>
-          ))}
+          )))}
         </TableBody>
       </Table>
     </TableContainer>
@@ -80,7 +84,7 @@ const useStyles = makeStyles({
  
  const mapStateToProps = state => {
   return {
-      orders: state.policy.orders,
+      customerPolicies: state.policy.customerPolicies,
       loading: state.policy.loading,
       token: state.auth.token,
       userId: state.auth.userId

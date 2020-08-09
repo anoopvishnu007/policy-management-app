@@ -50,14 +50,20 @@ const useStyles = makeStyles((theme) => ({
           <Link variant="button" color="textPrimary" to="/policies" className={classes.link}>
               My policies
           </Link>
-    
+          <Link variant="button" color="textPrimary" to="/updateProfile" className={classes.link}>
+              Upadate My Profile
+          </Link>
     </nav>
     : null } 
-      {props.isAuthenticated?<Button href="/logout" color="primary" variant="outlined" className={classes.link}>
-        SignOut
-    </Button>:null} 
+      {props.isAuthenticated?
+    <Link variant="button" to="/logout" color="textPrimary" className={classes.link}>
+    SignOut
+</Link>
+    :null} 
 
-    {!props.isAuthenticated?<Button href="/login" color="primary" variant="outlined" className={classes.link}>
+    {!props.isAuthenticated?
+    
+    <Button href="/login" color="primary" variant="outlined" className={classes.link}>
           SignIn
         </Button>: null}
         <Button href="/signup" color="primary" variant="outlined" className={classes.link}>

@@ -19,10 +19,11 @@ import Select from '@material-ui/core/Select';
 import axios from '../../axios-customers';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import * as actions from '../../store/actions/index';
-import Spinner from '../../components/UI/Spinner/Spinner';
+import Spinner from '../UI/Spinner/Spinner';
 import { Redirect } from 'react-router-dom';
 import { Dialog } from '@material-ui/core';
 import { checkValidity } from '../../shared/utility';
+ 
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -45,71 +46,55 @@ const useStyles = makeStyles((theme) => ({
 }));
 
  
-const SignUp = props => {
+const UserDetails = props => {
     
   const classes = useStyles();
 
 const [customer,setCustomer] = useState({});
   const submitHandler = event => {
     event.preventDefault();
-      const customer = {
-      name: name,
-      username: username,
-      password: password,
-      email:email,
-      birthDate:birthDate,
-      age:age,
-      regDate:regDate,
-      address:address,
-      country:country,
-      region:region,
-      citizenship:citizenship,
-      gender:gender,
-      maritalStatus:maritalStatus,
-      contactNumber:contactNumber,
-      idProofType:idProofType,
-      idDocumentNumber:idDocumentNumber,
-      customerId:customerId,
-      userId: props.userId
-    };
-    setCustomer(customer);
-    props.createUser(customer.username,customer.password,true);
-    //props.onSignupCustomer(customer, props.token);
+       
+    props.updateCustomerDetails(customer,  props.token)
   };
-  useEffect(() => {
-    customer.userId = props.userId;
-    console.log(props.userId);
-    if(customer.userId  && customer.userId !==''){
-      props.onSignupCustomer(customer, props.token);
+
+  const [error, setError] = useState('');
+  useEffect( () => {
+    async function fetchData() {
+      // You can await here
+      try {
+        console.log(props.userId);
+        if(props.userId  && props.userId !==''){
+          await props.fetchCustomer(props.userId, props.token);             
+        } } catch (e) {
+          setError(e.message || 'Unexpected error');
+      }
     }
+    fetchData();
+    
      // eslint-disable-next-line
-  }, [props.userId])
-  const [name, setName] = useState("");
-  const [username, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [birthDate, setBirthDate] = useState(new Date().toISOString().slice(0, 10));
-  const [regDate, setRegDate] = useState(new Date().toISOString().slice(0, 10));
-  const [address, setAddress] = useState("");
-  const [country, setCountry] = useState("");
-  const [region, setRegion] = useState("");
-  const [citizenship, setCitizenship] = useState("");
-  const [gender, setGender] = useState("");
-  const [maritalStatus, setMaritalStatus ]= useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [idProofType, setIdProofType] = useState("");
-  const [idDocumentNumber, setIdDocumentNumber] = useState("");
-  const [customerId] = useState("R-"+ Math.floor(Math.random()*1000));
+  }, [])
+  useEffect( () => {
+     function setData() {
+      // You can await here
+      try {
+        console.log(props.customer);
+        if(props.customer  && props.customer.length >0){
+          setCustomer(props.customer[0]);
+          Object.keys(props.customer[0]).map((k) => errors[k] = true)
+         
+         } } catch (e) {
+          setError(e.message || 'Unexpected error');
+      }
+    }
+    setData();
+    
+     // eslint-disable-next-line
+  }, [props.customer])
   
-  
-  
-  
-  const [age,setAge] = useState("");
      
   const [errors] = useState( {});
-
-  const validateField = (fieldName,idDocumentNumber,rules)=>{
-    let valid =checkValidity(idDocumentNumber,rules)
+  const validateField = (fieldName,newValue,rules)=>{
+    let valid =checkValidity(newValue,rules)
     errors[fieldName] = valid;
   }
   
@@ -118,8 +103,16 @@ const [customer,setCustomer] = useState({});
   
   const dateMaxLimit = new Date();  
   dateMaxLimit.setFullYear(dateMaxLimit.getFullYear() - 96);
-
-  let form = (
+  let form =<Spinner />
+  if (props.loading) {
+     return form;
+  }
+  if (error) {
+    let form = <div style={{color: 'red'}}>ERROR: {error}</div>
+    return form;
+  }
+  if(props.customer){
+    form = (
     <Container component="main" maxWidth="xs">
     <CssBaseline />
     <div className={classes.paper}>
@@ -127,22 +120,23 @@ const [customer,setCustomer] = useState({});
         <LockOutlinedIcon />
       </Avatar>
       <Typography component="h1" variant="h5">
-        Sign up
+        Update you profile details
       </Typography>
       <form onSubmit={submitHandler} className={classes.form}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
               autoComplete="fname"
-              name="Name"
+              name="name"
               variant="outlined"
               required
               fullWidth
               id="Name"
               label="Name"
-              value={name}
+              value={customer.name || ''}
               onChange={event => {
-                 setName(event.target.value);
+                //setName(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                  validateField(event.target.name,event.target.value, 
                   {
                     required: true,
@@ -150,7 +144,7 @@ const [customer,setCustomer] = useState({});
                   }
                 );             
               }}
-              error={!errors["Name"]}
+              error={!errors["name"]}
               
               autoFocus
             />
@@ -160,20 +154,21 @@ const [customer,setCustomer] = useState({});
               variant="outlined"
               required
               fullWidth
-              id="userName"
+              id="username"
               label="User Name (Email Address)"
-              name="userName"
+              name="username"
               autoComplete="userName"
-              value={username}
+              value={customer.username || ''}
               onChange={event => {
-                setUserName(event.target.value);
+                //setUserName(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                
                     isEmail: true
                   });
              }}
-             error= {!errors["userName"]}
+             error= {!errors["username"]}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -185,10 +180,11 @@ const [customer,setCustomer] = useState({});
               label="Password"
               type="password"
               id="password"
-              value={password}
+              value={customer.password || ''}
               autoComplete="current-password"
               onChange={event => {
-                setPassword(event.target.value);
+               // setPassword(event.target.value);
+               setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,
@@ -201,21 +197,22 @@ const [customer,setCustomer] = useState({});
           <Grid item xs={12} sm={6}>
             <TextField
               autoComplete="address"
-              name="Address"
+              name="address"
               variant="outlined"
               required
               fullWidth
               id="address"
-              value={address}
+              value={customer.address || ''}
               onChange={event => {
-                setAddress(event.target.value);
+                //setAddress(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,
                     });
              }}
               label="Address"
-              error= {!errors["Address"]}                 
+              error= {!errors["address"]}                 
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -224,9 +221,10 @@ const [customer,setCustomer] = useState({});
                   labelId ="citizenship-label"
                   id="citizenship"
                   name="citizenship" 
-                  value={citizenship}
+                  value={customer.citizenship || ''}
                   onChange={(val) => {
-                    setCitizenship(val);
+                    //setCitizenship(val);
+                    setCustomer({ ...customer, "citizenship": val });
                     validateField("citizenship",val, 
                       {
                         required: true,
@@ -242,9 +240,10 @@ const [customer,setCustomer] = useState({});
               <CountryDropdown
                   labelId ="country-label"
                   id="country"
-                  value={country}
+                  value={customer.country || ''}
                   onChange={(val) => {
-                    setCountry(val);
+                    //setCountry(val);
+                    setCustomer({ ...customer, "country": val });
                     validateField("country",val, 
                       {
                         required: true,
@@ -260,11 +259,13 @@ const [customer,setCustomer] = useState({});
               <RegionDropdown
                   labelId ="region-label"
                   id="region"
-                  country={country}
+                  name ="region"
+                  country={customer.country || ''}
                   labelType="full"
-                   value={region}
+                   value={customer.region || ''}
                   onChange={(val) => {
-                    setRegion(val);
+                   // setRegion(val);
+                   setCustomer({ ...customer, "region": val });
                     validateField("region",val, 
                       {
                         required: true,
@@ -284,9 +285,10 @@ const [customer,setCustomer] = useState({});
               id="email"
               label="Email Address"
               name="email"
-              value={email}
+              value={customer.email || ''}
               onChange={event => {
-                setEmail(event.target.value);
+                //setEmail(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                 {
                   required: true,
@@ -304,10 +306,11 @@ const [customer,setCustomer] = useState({});
                   labelId="gender-label"
                   id="gender"
                   name="gender"
-                  value={gender}
+                  value={customer.gender || ''}
                   fullWidth
                   onChange={event => {
-                    setGender(event.target.value);
+                    //setGender(event.target.value);
+                    setCustomer({ ...customer, "gender": event.target.value });
                     validateField(event.target.name,event.target.value, 
                     {
                       required: true,
@@ -327,9 +330,10 @@ const [customer,setCustomer] = useState({});
                   id="maritalStatus"
                   name = "maritalStatus"
                   fullWidth
-                  value={maritalStatus}
+                  value={customer.maritalStatus || ''}
                   onChange={event => {
-                    setMaritalStatus(event.target.value);
+                    //setMaritalStatus(event.target.value);
+                    setCustomer({ ...customer, "maritalStatus": event.target.value });
                     validateField(event.target.name,event.target.value, 
                       {
                         required: true,
@@ -351,9 +355,10 @@ const [customer,setCustomer] = useState({});
               fullWidth
               id="contactNumber"
               label="Contact Number" 
-              value={contactNumber}
+              value={customer.contactNumber || ''}
               onChange={event => {
-                setContactNumber(event.target.value);
+                //setContactNumber(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,
@@ -370,9 +375,10 @@ const [customer,setCustomer] = useState({});
               name='birthDate'
               id='birthDate'
               label='Date Of Birth'
-              value={birthDate}
+              value={customer.birthDate || ''}
               onChange={event => {
-                setBirthDate(event.target.value);
+                //setBirthDate(event.target.value);
+                setCustomer({ ...customer, [event.target.name]: event.target.value });
                  
                 let today = new Date();
                 let birthDat = new Date(event.target.value);
@@ -381,7 +387,8 @@ const [customer,setCustomer] = useState({});
                 if (m < 0 || (m === 0 && today.getDate() < birthDat.getDate())) {
                     age--;
                 }
-                setAge(age);
+                //setAge(age);
+                setCustomer({ ...customer, "age": age });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                    
@@ -402,32 +409,7 @@ const [customer,setCustomer] = useState({});
               
               />
           </Grid>
-          <Grid item xs={12} sm={6}>
-              <TextField
-              type='date'
-              name='regDate'
-              id='regDate'
-              label='Registration Date'
-              value={regDate}
-              onChange={event => {
-                setRegDate(event.target.value);
-                validateField(event.target.name,event.target.value, 
-                  {
-                    required: true,                    
-                   });
-             }}
-              variant='outlined'
-              margin='normal'
-              InputLabelProps={{
-                  shrink: true
-              }}
-              inputProps={{
-                  min: new Date().toISOString().slice(0, 10)
-              }}
-              error= {!errors["regDate"]}  
-              required
-              />
-          </Grid>
+           
           <Grid item xs={12} sm={6}>
               <InputLabel id="idprooftype-label">Identification Proof Type</InputLabel>
               <Select
@@ -435,9 +417,10 @@ const [customer,setCustomer] = useState({});
                   id="idprooftype"
                   name ="idProofType"                  
                   fullWidth
-                  value={idProofType}
+                  value={customer.idProofType || ''}
                   onChange={event => {
-                    setIdProofType(event.target.value);
+                   // setIdProofType(event.target.value);
+                   setCustomer({ ...customer, [event.target.name]: event.target.value });
                     validateField(event.target.name,event.target.value, 
                       {
                         required: true,                    
@@ -452,22 +435,23 @@ const [customer,setCustomer] = useState({});
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              autoComplete="IdentificationDocumentNumber"
-              name="IdentificationDocumentNumber"
+              autoComplete="idDocumentNumber"
+              name="idDocumentNumber"
               variant="outlined"
               required
               fullWidth
-              id="IdentificationDocumentNumber"
+              id="idDocumentNumber"
               label="Identification Document No" 
-              value={idDocumentNumber}
+              value={customer.idDocumentNumber || ''}
               onChange={event => {
-                setIdDocumentNumber(event.target.value);
+               // setIdDocumentNumber(event.target.value);
+               setCustomer({ ...customer, [event.target.name]: event.target.value });
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                    
                    });
              }}
-             error={!errors["IdentificationDocumentNumber"]}              
+             error={!errors["idDocumentNumber"]}              
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -495,19 +479,18 @@ const [customer,setCustomer] = useState({});
      
   </Container>
   );
-  if (props.loading) {
-    form = <Spinner />;
-  }
+            }
   let authRedirect = null;
-  if ( props.isAuthenticated ) {
-    form =( <Dialog open="true">
-      Signup successfull. You customer id is {customerId}
+  if ( props.isUpdateSuccessfull ) {
+    form =( 
+      
+    <Dialog open="true">
+      Update successfull.
     </Dialog>)
     authRedirect = <Redirect to={props.authRedirectPath} />
   }
   return (
-    <div className={classes.ContactData}>
-     
+    <div className={classes.ContactData}>     
        {form}
       {authRedirect}
     </div>
@@ -521,15 +504,17 @@ const mapStateToProps = state => {
     token: state.auth.token,
     isAuthenticated: state.auth.token !== null,
     userId: state.auth.userId,
-    authRedirectPath: state.auth.authRedirectPath
+    isUpdateSuccessfull:state.signup.isUpdateSuccessfull,
+    authRedirectPath: state.auth.authRedirectPath,
+    customer:state.signup.customerData
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    createUser: ( email, password, isSignup ) => dispatch( actions.auth( email, password, isSignup ) ),
-    onSignupCustomer: (customer, token) =>
-      dispatch(actions.customerSignup(customer, token))
+    fetchCustomer: ( userId, token ) => dispatch( actions.fetchCustomerDetails(  userId, token) ),
+    updateCustomerDetails: (customer, token) =>
+      dispatch(actions.customerUpdate(customer, token))
       
   };
 };
@@ -537,4 +522,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withErrorHandler(SignUp, axios));
+)(withErrorHandler(UserDetails, axios));

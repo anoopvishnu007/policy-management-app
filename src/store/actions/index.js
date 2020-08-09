@@ -15,7 +15,16 @@ export {
     customerSignupInit,
     customerSignupStart,
     customerSignupFail,
-    customerSignupSuccess     
+    customerSignupSuccess,
+    customerUpdate,
+    customerUpdateFail,
+    customerUpdateInit,
+    customerUpdateStart,
+    customerUpdateSuccess,
+    fetchCustomerDetails,
+    fetchCustomerDetailsStart,
+    fetchCustomerDetailsSuccess,
+    fetchCustomerDetailsFail    
 } from './signup';
 export {
     auth,

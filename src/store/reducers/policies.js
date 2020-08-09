@@ -2,7 +2,7 @@ import * as actionTypes from '../actions/actionTypes';
 import { updateObject } from '../../shared/utility';
 
 const initialState = {
-    orders: [],
+    customerPolicies: [],
     loading: false,
     purchased: false
 };
@@ -16,11 +16,11 @@ const purchasePolicyStart = ( state, action ) => {
 };
 
 const purchasePolicySuccess = ( state, action ) => {
-    const newOrder = updateObject( action.orderData, { id: action.orderId } );
+    const customerPolicies = updateObject( action.customerPolicies, { id: action.purchaseId } );
     return updateObject( state, {
         loading: false,
         purchased: true,
-        orders: state.orders.concat( newOrder )
+        customerPolicies: state.customerPolicies.concat( customerPolicies )
     } );
 };
 
@@ -34,7 +34,7 @@ const fetchCustomerPoliciesStart = ( state, action ) => {
 
 const fetchCustomerPoliciesSuccess = ( state, action ) => {
     return updateObject( state, {
-        orders: action.orders,
+        customerPolicies: action.customerPolicies,
         loading: false
     } );
 };

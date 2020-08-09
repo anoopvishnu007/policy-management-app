@@ -3,7 +3,7 @@ import * as actionTypes from "./actionTypes";
 export const purchasePoliciesSuccess = (id, customerPolicies) => {
   return {
     type: actionTypes.PURCHASE_POLICIES_SUCCESS,
-    orderId: id,
+    purchaseId: id,
     customerPolicies: customerPolicies
   };
 };
@@ -35,10 +35,10 @@ export const purchaseInit = () => {
   };
 };
 
-export const fetchCustomerPoliciesSuccess = orders => {
+export const fetchCustomerPoliciesSuccess = customerPolicies => {
   return {
     type: actionTypes.FETCH_CUSTOMER_POLICIES_SUCCESS,
-    orders: orders
+    customerPolicies: customerPolicies
   };
 };
 
