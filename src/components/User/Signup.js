@@ -22,7 +22,7 @@ import * as actions from '../../store/actions/index';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import { Redirect } from 'react-router-dom';
 import { Dialog } from '@material-ui/core';
-import { checkValidity } from '../../shared/utility';
+import {validateField } from '../../shared/utility';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+   
 }));
 
  
@@ -74,11 +75,9 @@ const [customer,setCustomer] = useState({});
     };
     setCustomer(customer);
     props.createUser(customer.username,customer.password,true);
-    //props.onSignupCustomer(customer, props.token);
   };
   useEffect(() => {
     customer.userId = props.userId;
-    console.log(props.userId);
     if(customer.userId  && customer.userId !==''){
       props.onSignupCustomer(customer, props.token);
     }
@@ -108,10 +107,7 @@ const [customer,setCustomer] = useState({});
      
   const [errors] = useState( {});
 
-  const validateField = (fieldName,idDocumentNumber,rules)=>{
-    let valid =checkValidity(idDocumentNumber,rules)
-    errors[fieldName] = valid;
-  }
+  
   
   const dateMinLimit = new Date();  
   dateMinLimit.setFullYear(dateMinLimit.getFullYear() - 18);
@@ -147,7 +143,7 @@ const [customer,setCustomer] = useState({});
                   {
                     required: true,
                     onlyAlphabetsAndSpace: true
-                  }
+                  },errors
                 );             
               }}
               error={!errors["Name"]}
@@ -171,7 +167,7 @@ const [customer,setCustomer] = useState({});
                   {
                     required: true,                
                     isEmail: true
-                  });
+                  },errors);
              }}
              error= {!errors["userName"]}
             />
@@ -193,7 +189,7 @@ const [customer,setCustomer] = useState({});
                   {
                     required: true,
                     minLength: 6
-                   });
+                   },errors);
              }}
              error= {!errors["password"]}   
             />
@@ -212,7 +208,7 @@ const [customer,setCustomer] = useState({});
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,
-                    });
+                    },errors);
              }}
               label="Address"
               error= {!errors["Address"]}                 
@@ -230,7 +226,7 @@ const [customer,setCustomer] = useState({});
                     validateField("citizenship",val, 
                       {
                         required: true,
-                      });
+                      },errors);
                  }}
                   showDefaultOption= {true}
                   fullWidth
@@ -248,7 +244,7 @@ const [customer,setCustomer] = useState({});
                     validateField("country",val, 
                       {
                         required: true,
-                      });
+                      },errors);
                  }}
                   showDefaultOption= {true}
                   fullWidth
@@ -268,7 +264,7 @@ const [customer,setCustomer] = useState({});
                     validateField("region",val, 
                       {
                         required: true,
-                      });
+                      },errors);
                  }}
                   showDefaultOption= {true}
                   fullWidth
@@ -291,7 +287,7 @@ const [customer,setCustomer] = useState({});
                 {
                   required: true,
                   isEmail:true 
-                });
+                },errors);
              }}
               autoComplete="email"
               error= {!errors["email"]} 
@@ -311,7 +307,7 @@ const [customer,setCustomer] = useState({});
                     validateField(event.target.name,event.target.value, 
                     {
                       required: true,
-                     });
+                     },errors);
                  }}
                   label="Gender"
                   error= {!errors["gender"]} 
@@ -333,7 +329,7 @@ const [customer,setCustomer] = useState({});
                     validateField(event.target.name,event.target.value, 
                       {
                         required: true,
-                       });
+                       },errors);
                  }}
                   label="Marital Status"
                   error= {!errors["maritalStatus"]} 
@@ -359,7 +355,7 @@ const [customer,setCustomer] = useState({});
                     required: true,
                     minLength:10,
                     isNumeric:true
-                   });
+                   },errors);
              }}
              error= {!errors["contactNumber"]}          
             />
@@ -385,7 +381,7 @@ const [customer,setCustomer] = useState({});
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                    
-                   });
+                   },errors);
              }}
               helperText='You need to be at least 18 years old'
               variant='outlined'
@@ -414,7 +410,7 @@ const [customer,setCustomer] = useState({});
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                    
-                   });
+                   },errors);
              }}
               variant='outlined'
               margin='normal'
@@ -441,7 +437,7 @@ const [customer,setCustomer] = useState({});
                     validateField(event.target.name,event.target.value, 
                       {
                         required: true,                    
-                       });
+                       },errors);
                  }}
                   label="Identification Proof Type"
                   error= {!errors["idProofType"]}
@@ -465,7 +461,7 @@ const [customer,setCustomer] = useState({});
                 validateField(event.target.name,event.target.value, 
                   {
                     required: true,                    
-                   });
+                   },errors);
              }}
              error={!errors["IdentificationDocumentNumber"]}              
             />

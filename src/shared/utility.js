@@ -38,3 +38,8 @@ export const checkValidity = ( value, rules ) => {
     }
     return isValid;
 }
+
+export const validateField = (fieldName,value,rules,errors)=>{
+    let valid =checkValidity(value,rules)
+    errors[fieldName] = valid;
+}

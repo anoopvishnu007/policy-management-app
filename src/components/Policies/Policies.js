@@ -1,10 +1,14 @@
-import React,{  useEffect }  from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import axios from '../../axios-customers';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import * as actions from '../../store/actions/index';
-import {withStyles, makeStyles, Paper, TableContainer, Table, TableHead, TableRow, TableBody, TableCell } from '@material-ui/core';
+import { withStyles, makeStyles, Paper, TableContainer, Table, TableHead, TableRow, TableBody, TableCell, Button, Grid, Container, CssBaseline, Typography } from '@material-ui/core';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { Link } from 'react-router-dom';
 
+var moment = require('moment')
 const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.common.black,
@@ -23,78 +27,176 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
-const useStyles = makeStyles({
-  table: {
-    minWidth: 700,
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
-});
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(3),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  table: {
+    minWidth: 500,
+  },
+}));
 
- const Policies = (props)=> {
+
+const Policies = (props) => {
   const classes = useStyles();
   useEffect(() => {
     props.onFetchCustomerPolicies(props.token, props.userId);
     // eslint-disable-next-line
   }, [])
+
+
   if (props.loading) {
     return <div>Loading</div>
-  }   
-  if (props.error) {
-    return <div style={{color: 'red'}}>ERROR: {this.props.error}</div>
   }
-  return (
+
+  if (props.error) {
+    return <div style={{ color: 'red' }}>ERROR: {this.props.error}</div>
+  }
+
+  let policies = null;
+  if (props.customerPolicies) {
+    policies = Object.keys(props.customerPolicies).filter((p) => {
+      if (p) {
+        return true;
+      }
+      return false;
+    }).map((k) => {
+
+      return props.customerPolicies[k].policies;
+    }
+    );
+
+  }
    
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="customized table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Policy Type</StyledTableCell>
-            <StyledTableCell align="right">Amount</StyledTableCell>
-            <StyledTableCell align="right">Start Date</StyledTableCell>
-            <StyledTableCell align="right">Duration</StyledTableCell>
-           </TableRow>
-        </TableHead>
-        <TableBody>
-          {Object.keys(props.customerPolicies).map((k)=>Object.keys(props.customerPolicies[k]).map((row) => (
-            <StyledTableRow key={row.policyType}>
-              <StyledTableCell component="th" scope="row">
-                {row.policyType}
+  const printDocument = () => {
+    const input = document.getElementById('divToPrint');
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, 'JPEG', 0, 0);
+        // pdf.output('dataurlnewwindow');
+        pdf.save("download.pdf");
+      })
+      ;
+  }
+  if (policies && policies.length > 0) {
+    return (
+      <div>
+        <Container component="main" maxWidth="xl">
+          <CssBaseline />
+          <div className={classes.paper}>
+            <Typography component="h1" variant="h5">
+              Your current policies are shown below.
+            </Typography>
+            <TableContainer component={Paper}>
+              <div id="divToPrint">
+                <Table className={classes.table} aria-label="customized table">
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Policy Type</StyledTableCell>
+                      <StyledTableCell align="right">Amount</StyledTableCell>
+                      <StyledTableCell align="right">Start Date</StyledTableCell>
+                      <StyledTableCell align="right">Duration</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {policies[0].map((row, i) => (
+                      <StyledTableRow key={i}>
+                        <StyledTableCell component="th" scope="row">
+                          {row.policyType}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">{row.policyAmount}</StyledTableCell>
+                        <StyledTableCell align="right">{moment(row.policyStartDate).format('D/MM/YYYY')}</StyledTableCell>
+                        <StyledTableCell align="right">{row.policyDuration}</StyledTableCell>
+                      </StyledTableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+            </TableContainer>
+            <Grid container spacing={4} justify="center">
+              <Grid item xs={12} sm={6} className={classes.submit} align="right">
+                <Button
+                  onClick={printDocument}
+                  variant="contained"
+                  color="primary"
+                >Print</Button>
+              </Grid>
+              <Grid item xs={12} sm={6} className={classes.submit}>
+                <Button
+                  component={Link}
+                  variant="contained"
+                  color="primary"
+                  to="/purchase"
+                 >Purchase More</Button>
+                <Link variant="button" color="textPrimary" to="/purchase" >
+
+                </Link>
+
+              </Grid>
+            </Grid>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+  else {
+    return (
+
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="customized table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Policy Type</StyledTableCell>
+              <StyledTableCell align="right">Amount</StyledTableCell>
+              <StyledTableCell align="right">Start Date</StyledTableCell>
+              <StyledTableCell align="right">Duration</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <StyledTableRow>
+              <StyledTableCell component="th" scope="row" colSpan="4">
+                No Policies found.!!
               </StyledTableCell>
-              <StyledTableCell align="right">{row.policyAmount}</StyledTableCell>
-               <StyledTableCell align="right">{row.policyStartDate}</StyledTableCell>
-              <StyledTableCell align="right">{row.policyDuration}</StyledTableCell>
+
             </StyledTableRow>
-          )))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  }
 }
- 
- const mapStateToProps = state => {
+
+const mapStateToProps = state => {
   return {
-      customerPolicies: state.policy.customerPolicies,
-      loading: state.policy.loading,
-      token: state.auth.token,
-      userId: state.auth.userId
+    customerPolicies: state.policy.customerPolicies,
+    loading: state.policy.loading,
+    token: state.auth.token,
+    userId: state.auth.userId
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onFetchCustomerPolicies: (token, userId) => dispatch( actions.fetchCustomerPolicies(token, userId) )
+    onFetchCustomerPolicies: (token, userId) => dispatch(actions.fetchCustomerPolicies(token, userId))
   };
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( withErrorHandler( Policies, axios ) );
+export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(Policies, axios));

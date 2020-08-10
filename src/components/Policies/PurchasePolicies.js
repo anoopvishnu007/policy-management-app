@@ -4,7 +4,10 @@ import axios from '../../axios-customers';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import * as actions from '../../store/actions/index';
 import { TextField,Button, Container, CssBaseline, Grid, InputLabel, Select, MenuItem, makeStyles } from '@material-ui/core';
- 
+import Spinner from '../UI/Spinner/Spinner';
+import { Redirect } from 'react-router-dom';
+import { Dialog } from '@material-ui/core';
+import { validateField } from '../../shared/utility';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -30,17 +33,32 @@ function PurchasePolicies(props) {
   const classes = useStyles();
   const submitHandler = event => {
     event.preventDefault();
-    const custPolicies = {
-      userId:userId,
-      policies:[...customerPolicies.policies, {
-        policyType: policyType,
-        policyAmount: policyAmount,
-        policyStartDate: policyStartDate,
-        policyDuration:policyDuration
-      }]
-       
+
+    let isPost = true;
+    let newPolicy = {
+      policyType: policyType,
+      policyAmount: policyAmount,
+      policyStartDate: policyStartDate,
+      policyDuration: policyDuration
     };
-    props.purchasePolicy(custPolicies,props.token);
+    let custPolicies = {
+      userId: userId,
+      policies: [newPolicy]
+    }
+    if (customerPolicies) {
+       Object.keys(customerPolicies).filter((p) => {
+        if (p) {
+          return true;
+        }
+        return false;
+      }).map((k) => { 
+        return customerPolicies[k].policies.push(newPolicy);
+      });
+      custPolicies = { ...customerPolicies }
+      isPost =false;
+    }
+
+    props.purchasePolicy(custPolicies, props.token, isPost);
    };
    
   const [policyType, setPolicyType] = useState("");
@@ -48,15 +66,28 @@ function PurchasePolicies(props) {
   const [policyStartDate, setPolicyStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [policyDuration, setPolicyDuration] = useState("");   
   const [userId] = useState(props.userId);
-  const [customerPolicies] = useState(props.customerPolicies);   
+  const [customerPolicies,setCustomerPolicies] = useState();   
   const [errors] = useState( {});
   useEffect(() => {
     props.onFetchCustomerPolicies(props.token, props.userId);
     // eslint-disable-next-line
   }, [])
+  useEffect(() => {
+    if(props.customerPolicies){
+      setCustomerPolicies(props.customerPolicies);
+    }
+    
+    // eslint-disable-next-line
+  }, [props.customerPolicies]);
+
+
   const dateLimit = new Date();
    dateLimit.setFullYear(dateLimit.getFullYear() - 18);
-  return (
+   let form =<Spinner />
+  if (props.loading) {
+     return form;
+  }
+  form = (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
@@ -70,16 +101,24 @@ function PurchasePolicies(props) {
                 <Select
                     labelId="policyType-label"
                     id="policyType"
+                    name="policyType"
                     value={policyType}
                     fullWidth
                     onChange={event => {
                       setPolicyType(event.target.value);
+                      validateField(event.target.name,event.target.value, 
+                        {
+                          required: true,                    
+                         },errors);
                    }}
                     label="Policy Type"
                     autoFocus
+                    required
+                    error={!errors["policyType"]} 
                 >                     
                     <MenuItem value="Life">Life</MenuItem>
                     <MenuItem value="Annuities">Annuities</MenuItem>
+                    
                  </Select>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -94,11 +133,17 @@ function PurchasePolicies(props) {
                 value={policyAmount}                
                 onChange={event => {
                   setPolicyAmount(event.target.value);
-               }}               
+                  validateField(event.target.name,event.target.value, 
+                    {
+                      required: true,                    
+                     },errors);
+               }} 
+               error={!errors["policyAmount"]}              
               />
             </Grid>
             <Grid item xs={12} sm={6}>
                 <TextField
+                autoComplete="policyStartDate"
                 type='date'
                 name='policyStartDate'
                 id='policyStartDate'
@@ -108,15 +153,18 @@ function PurchasePolicies(props) {
                 value={policyStartDate}
                 onChange={event => {
                   setPolicyStartDate(event.target.value);
+                  validateField(event.target.name,event.target.value, 
+                    {
+                      required: true,                    
+                     },errors);
                }} 
                 InputLabelProps={{
                     shrink: true
                 }}
                 inputProps={{
-                    min: new Date(),
-                    max: new Date()
+                  min: new Date().toISOString().slice(0, 10)
                 }}
-                error={!!errors["policyStartDate"]}
+                error={!errors["policyStartDate"]}
                 required
                 />
             </Grid>
@@ -125,12 +173,19 @@ function PurchasePolicies(props) {
                 <Select
                     labelId="policyDuration-label"
                     id="policyDuration"
+                    name="policyDuration"
                     fullWidth
                     value={policyDuration}
                     onChange={event => {
                       setPolicyDuration(event.target.value);
+                      validateField(event.target.name,event.target.value, 
+                        {
+                          required: true,                    
+                         },errors);
                     }} 
                     label="Duration Of Policy"
+                    required
+                    error={!errors["policyDuration"]}
                 >   
                 <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>                  
@@ -158,12 +213,29 @@ function PurchasePolicies(props) {
        
     </Container>
   );
+
+  let authRedirect = null;
+  if ( props.purchased ) {
+    form =( 
+      
+    <Dialog open={props.purchased}>
+      Update successfull.
+    </Dialog>)
+    authRedirect = <Redirect to="/" />
+  }
+  return (
+    <div className={classes.ContactData}>     
+       {form}
+      {authRedirect}
+    </div>
+  );
 }
 
 const mapStateToProps = state => {
   return {
     customerPolicies: state.policy.customerPolicies,
-    loading: state.policy.loading,    
+    loading: state.policy.loading,
+    purchased:state.policy.purchased,    
     token: state.auth.token,
     isAuthenticated: state.auth.token !== null,
     userId: state.auth.userId,
@@ -172,8 +244,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-     purchasePolicy: (customerPolicies, token) =>
-     dispatch(actions.purchasePolicies(customerPolicies, token)),
+     purchasePolicy: (customerPolicies, token ,isPost) =>
+     dispatch(actions.purchasePolicies(customerPolicies, token, isPost)),
      onFetchCustomerPolicies: (token, userId) => dispatch( actions.fetchCustomerPolicies(token, userId) )  
   };
 };

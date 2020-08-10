@@ -43,13 +43,13 @@ export function* fetchCustomerDetailsSaga(action) {
     '"';
   try {
     const response = yield axios.get("/Customers.json" + queryParams);
-    const fetchedCustmer = [];
-    for (let key in response.data) {
+    const fetchedCustmer = response.data;
+    /*for (let key in response.data) {
       fetchedCustmer.push({
         ...response.data[key],
         id: key
       });
-    }
+    }*/
     yield put(actions.fetchCustomerDetailsSuccess(fetchedCustmer));
   } catch (error) {
     yield put(actions.fetchCustomerDetailsFail(error));

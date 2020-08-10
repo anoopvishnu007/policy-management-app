@@ -21,11 +21,12 @@ export const purchasePoliciesStart = () => {
   };
 };
 
-export const purchasePolicies = (customerPolicies, token) => {
+export const purchasePolicies = (customerPolicies, token,isPost) => {
   return {
     type: actionTypes.PURCHASE_POLICIES,
     customerPolicies: customerPolicies,
-    token: token
+    token: token,
+    isPost: isPost
   };
 };
 
