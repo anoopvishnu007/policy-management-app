@@ -12,6 +12,15 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
+Use the application by folowing the below steps
+
+1.) Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+2.) if new user , signup usng the sigup button
+3.) Upon registration you can login using the email id and password you have netered while signup to login
+4.) You can see the policies home page when loggging in
+5.) Purchase policies button  or product page link in the top will direct to purchase page and purchase policies
+6.) Update my profile link can be used to update user details 
+
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.<br />

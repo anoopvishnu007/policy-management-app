@@ -13,7 +13,7 @@ const customerSignupInit = ( state, action ) => {
 };
 
 const customerSignupStart = ( state, action ) => {
-    return updateObject( state, { loading: true } );
+    return updateObject( state, { loading: true ,isUpdateSuccessfull:false} );
 };
 
 const customerSignupSuccess = ( state, action ) => {
@@ -30,7 +30,7 @@ const customerSignupFail = ( state, action ) => {
     return updateObject( state, { loading: false,isUpdateSuccessfull:false } );
 };
 const customerUpdateStart = ( state, action ) => {
-    return updateObject( state, { loading: true } );
+    return updateObject( state, { loading: true , isUpdateSuccessfull:false} );
 };
 
 const customerUpdateSuccess = ( state, action ) => {

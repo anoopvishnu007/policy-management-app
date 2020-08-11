@@ -21,8 +21,9 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import * as actions from '../../store/actions/index';
 import Spinner from '../UI/Spinner/Spinner';
 import { Redirect } from 'react-router-dom';
-import { Dialog } from '@material-ui/core';
+import { Snackbar } from '@material-ui/core';
 import { checkValidity } from '../../shared/utility';
+import MuiAlert from '@material-ui/lab/Alert';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -44,13 +45,31 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2),
   },
 }));
-
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const UserDetails = props => {
 
   const classes = useStyles();
 
   const [customer, setCustomer] = useState(props.customer || {});
+
+  const [snackbarOpen, setSnackbarOpen] = React.useState(true);
+
+
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    form= (<div><Redirect to={props.authRedirectPath} /> </div>);
+    
+    setErrorForm(false);
+    setSnackbarOpen(false);
+   
+   };
+
   const submitHandler = event => {
     event.preventDefault();
     let keys = Object.keys(props.customer);
@@ -59,16 +78,20 @@ const UserDetails = props => {
     for (let i = 0; i < keys.length; i++) {
       if (errors[keys[i]] === false) {
         isValid = false;
+        setError("Entered values are invalid for " + keys[i] + ". Please correct it.")
+        setErrorForm(true);
         break;
       }
-    } 
+    }
     if (isValid) {
       props.updateCustomerDetails(customer, props.token)
-    }  
+      setSnackbarOpen(true);
+    }
 
   };
 
   const [error, setError] = useState('');
+  const [errorForm, setErrorForm] = useState(false);
   useEffect(() => {
     async function fetchData() {
       // You can await here
@@ -123,15 +146,28 @@ const UserDetails = props => {
   if (props.loading) {
     return form;
   }
-  if (error) {
-    let form = <div style={{ color: 'red' }}>ERROR: {error}</div>
-    return form;
+  let erroredForm = "";
+  if (errorForm) {
+    erroredForm = (<Alert open={errorForm} onClose={handleClose} severity="error">
+      {error}
+    </Alert>)
   }
+  let updateMessage = "";
+  if (snackbarOpen) {
+    updateMessage = (<Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleClose}>
+      <Alert onClose={handleClose} severity="success">
+        Update successfull.
+      </Alert>
+    </Snackbar>)
+  }
+  
   if (props.customer) {
     form = (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
+          {erroredForm}
+          {updateMessage}
           <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>
@@ -496,19 +532,15 @@ const UserDetails = props => {
       </Container>
     );
   }
-  let authRedirect = null;
+  //let authRedirect = null;
   if (props.isUpdateSuccessfull) {
-    form = (
-
-      <Dialog open="true">
-        Update successfull.
-      </Dialog>)
-    authRedirect = <Redirect to={props.authRedirectPath} />
+ 
+    //authRedirect = <div><Redirect to={props.authRedirectPath} /> </div>
   }
   return (
     <div className={classes.ContactData}>
       {form}
-      {authRedirect}
+        
     </div>
   );
 
